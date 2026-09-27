@@ -54,6 +54,7 @@ copy .env.example .env
 | `APP_ENV`              | Umgebung: `development` oder `production`                      |
 | `DATABASE_URL`         | PostgreSQL-Verbindungs-URL (z. B. `postgresql+psycopg://sport:sport@localhost:5432/sportdb`) |
 | `ADMIN_API_KEY`        | Geheimer Schlüssel für Admin-Endpunkte (beliebiger sicherer Wert) |
+| `SESSION_SECRET`       | Signier-Schlüssel für das Admin-UI-Session-Cookie (`/admin`), beliebiger sicherer Wert |
 | `LOG_LEVEL`            | Log-Level: `DEBUG`, `INFO`, `WARNING`, `ERROR`                 |
 | `ENABLE_SCHEDULER`     | Scheduler aktivieren: `true` oder `false`                      |
 | `OPENF1_BASE_URL`      | Basis-URL der OpenF1-API (Standard: `https://api.openf1.org/v1`) |
@@ -156,15 +157,17 @@ Der Scheduler läuft im selben Prozess wie FastAPI und stoppt automatisch mit de
 
 ### Nächster Tag – Wieder loslegen
 
-1. **Docker-Container starten:**
+1. **Docker-Desktop starten:**
+
+2. **Docker-Container starten:**
    ```powershell
    docker compose up -d
    ```
-2. **Virtuelle Umgebung aktivieren** (falls noch nicht aktiv):
+3. **Virtuelle Umgebung aktivieren** (falls noch nicht aktiv):
    ```powershell
    .venv\Scripts\activate
    ```
-3. **FastAPI-Server starten:**
+4. **FastAPI-Server starten:**
    ```powershell
    uvicorn main:app --reload
    ```

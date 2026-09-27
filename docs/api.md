@@ -20,6 +20,21 @@ Der Wert muss mit der Umgebungsvariable `ADMIN_API_KEY` übereinstimmen. Öffent
 
 ---
 
+## Admin-Weboberfläche (`/admin`)
+
+Zusätzlich zur REST-API gibt es eine browserbasierte, gesicherte Admin-Oberfläche:
+
+- **`/admin`** – Dashboard mit Kennzahlen und Schnellaktionen (Datenimporte auslösen)
+- **`/admin/schedulers`** – Scheduler-Jobs ansehen, pausieren/fortsetzen, sofort ausführen, Ausführungshistorie
+- **`/admin/architecture`** – interaktiver Graph: Endpunkt → Service → Datenquelle/DB-Tabelle → Scheduler-Job
+- **`/admin/endpoints`** – tabellarische Endpunkt-Referenz mit Datenfluss
+
+**Login:** unter `/admin/login` mit dem `ADMIN_API_KEY` anmelden; danach wird ein signiertes,
+HTTP-only Session-Cookie gesetzt (Signierschlüssel: `SESSION_SECRET`). Die REST-Endpunkte unter
+`/admin/api/...` akzeptieren sowohl dieses Cookie als auch weiterhin den `X-API-Key`-Header.
+
+---
+
 ## Endpunkte
 
 ### Health

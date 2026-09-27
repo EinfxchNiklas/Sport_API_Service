@@ -17,6 +17,7 @@ Eine zentrale REST-API für Sport-Live- und Historikdaten. Aktuell unterstützte
 - Schemavorvalidierung mit Pydantic v2
 - Datenbankmigrationen mit Alembic
 - Admin-Endpunkte zum Auslösen von Datenimporten (geschützt per `X-API-Key`)
+- Gesicherte Admin-Weboberfläche (`/admin`) mit Dashboard, Scheduler-Verwaltung und interaktivem Architektur-Graph
 - Hintergrundaufgaben mit APScheduler
 - Deployment-Ready für [Render](https://render.com) (`render.yaml`)
 - Lokale Entwicklung mit Docker Compose (PostgreSQL + pgAdmin)
@@ -34,6 +35,7 @@ Eine zentrale REST-API für Sport-Live- und Historikdaten. Aktuell unterstützte
 | Schemas            | Pydantic v2                        |
 | HTTP-Client        | httpx                              |
 | Scheduler          | APScheduler                        |
+| Admin-UI           | Jinja2 + Cytoscape.js (CDN)         |
 | Tests              | pytest                             |
 
 ---
@@ -54,11 +56,12 @@ Sport_Dashboard_API/
 │   ├── api/
 │   │   └── v1/                # FastAPI-Router (health, bundesliga, f1, nfl, admin)
 │   ├── models/                # SQLAlchemy-Modelle
-│   ├── schemas/               # Pydantic-Schemas (Base/Create/Read)
-│   ├── services/              # Import-Services (Fetch → Normalize → Upsert)
-│   │   └── datasources/       # HTTP-Clients (OpenF1, API-Football, Tank01)
-│   ├── schedulers/            # APScheduler-Integration
-│   └── database/              # Session, Seed
+│   ├── schemas/                # Pydantic-Schemas (Base/Create/Read)
+│   ├── services/               # Import-Services (Fetch → Normalize → Upsert)
+│   │   └── datasources/        # HTTP-Clients (OpenF1, API-Football, Tank01)
+│   ├── schedulers/             # APScheduler-Integration
+│   ├── web/                    # Admin-Weboberfläche (/admin): Router, Templates, Static
+│   └── database/               # Session, Seed
 ├── migrations/                # Alembic-Migrationen
 ├── tests/                     # pytest-Tests
 └── docs/                      # Dokumentation (Deutsch)
@@ -112,6 +115,7 @@ uvicorn main:app --reload
 
 API erreichbar unter: [http://localhost:8000](http://localhost:8000)
 Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+Admin-Weboberfläche: [http://localhost:8000/admin](http://localhost:8000/admin) (Login mit `ADMIN_API_KEY`)
 
 ---
 
@@ -138,6 +142,21 @@ Vollständige API-Referenz: [docs/api.md](docs/api.md)
 
 ---
 
+## Admin-Weboberfläche
+
+Unter `/admin` steht eine gesicherte, browserbasierte Oberfläche zur Verfügung:
+
+- **Dashboard** – Kennzahlen und Schnellaktionen zum Auslösen von Datenimporten
+- **Scheduler** – Jobs ansehen, pausieren/fortsetzen, sofort ausführen, Ausführungshistorie
+- **Architektur** – interaktiver Graph: Endpunkt → Service → Datenquelle/DB-Tabelle → Scheduler-Job
+- **Endpunkte** – tabellarische Referenz aller Endpunkte mit Datenfluss
+
+Login unter `/admin/login` mit dem `ADMIN_API_KEY`; danach übernimmt ein signiertes Session-Cookie
+(`SESSION_SECRET`) die Authentifizierung im Browser. Die `/admin/api/...`-Endpunkte akzeptieren
+zusätzlich weiterhin den `X-API-Key`-Header.
+
+---
+
 ## Authentifizierung
 
 Admin-Endpunkte erfordern den HTTP-Header:
@@ -147,6 +166,9 @@ X-API-Key: <dein ADMIN_API_KEY>
 ```
 
 Der Wert wird in der Umgebungsvariable `ADMIN_API_KEY` definiert. Öffentliche GET-Endpunkte benötigen keinen Key.
+
+Die Admin-Weboberfläche (`/admin`) nutzt zusätzlich ein signiertes Session-Cookie nach dem Login
+(Signierschlüssel: `SESSION_SECRET`).
 
 ---
 

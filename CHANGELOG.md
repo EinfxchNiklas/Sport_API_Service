@@ -4,6 +4,25 @@ Alle wesentlichen Änderungen an diesem Projekt werden in dieser Datei dokumenti
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [0.2.0] - 2026-09-27
+
+### Hinzugefügt
+
+- Gesicherte Admin-Weboberfläche unter `/admin` (Jinja2 + Cytoscape.js), Login per `ADMIN_API_KEY`
+  mit signiertem Session-Cookie (`SESSION_SECRET`); `require_admin` akzeptiert nun sowohl den
+  `X-API-Key`-Header als auch das Session-Cookie
+- `/admin` Dashboard mit Live-Kennzahlen (DB-Zeilenanzahl, Scheduler-Status) und Schnellaktions-
+  Buttons zum direkten Auslösen aller bestehenden Import-Services
+- `/admin/schedulers`: Scheduler-Jobs ansehen, pausieren/fortsetzen, sofort ausführen ("Run now")
+  sowie eine In-Memory-Ausführungshistorie (APScheduler-Event-Listener)
+- `/admin/architecture`: interaktiver Abhängigkeitsgraph (Endpunkt → Service → Datenquelle/
+  DB-Tabelle → Scheduler-Job) aus einem kuratierten Metadaten-Modul, mit "Neu generieren"-Button
+  zur Live-Introspektion der registrierten Routen
+- `/admin/endpoints`: filterbare tabellarische Referenz aller Endpunkte mit Datenfluss
+- Neue Scheduler-Verwaltungsfunktionen (`list_jobs`, `pause_job`, `resume_job`, `run_job_now`,
+  `get_job_history`, `scheduler_status`) in `app/schedulers/scheduler.py`
+- Swagger-Doku-Link (`/docs`) direkt in der Admin-Navigation
+
 ## [0.1.0] - 2026-07-23
 
 ### Hinzugefügt

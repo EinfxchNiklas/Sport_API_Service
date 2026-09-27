@@ -37,7 +37,8 @@ Einige Variablen werden von Render automatisch gesetzt, andere musst du manuell 
 
 | Variable        | Beschreibung                                                    |
 |-----------------|-----------------------------------------------------------------|
-| `ADMIN_API_KEY` | Render generiert einen zufälligen sicheren Wert (`generateValue: true`). Den generierten Wert findest du im Render-Dashboard unter „Environment" des Web Service. Notiere ihn – du benötigst ihn für Admin-API-Aufrufe. |
+| `ADMIN_API_KEY` | Render generiert einen zufälligen sicheren Wert (`generateValue: true`). Den generierten Wert findest du im Render-Dashboard unter „Environment" des Web Service. Notiere ihn – du benötigst ihn für Admin-API-Aufrufe und den Login unter `/admin`. |
+| `SESSION_SECRET`| Ebenfalls automatisch generiert (`generateValue: true`). Signiert das Session-Cookie der Admin-Weboberfläche (`/admin`). Ein manueller Login ist nach jeder Rotation dieses Werts erneut nötig. |
 
 ### Manuell zu setzende Variablen (`sync: false`)
 
@@ -89,4 +90,8 @@ Du kannst denselben Endpunkt auch für **UptimeRobot** oder andere Monitoring-Di
 - **Datenbank nicht öffentlich:** Die Render-PostgreSQL-Instanz ist standardmäßig nur intern erreichbar. Öffne keinen öffentlichen Datenbankzugriff, es sei denn, du weißt genau, was du tust.
 - **Secrets nur als ENV-Variablen:** Trage API-Keys und Passwörter ausschließlich als Umgebungsvariablen in Render ein. Schreibe sie niemals direkt in den Code oder in Dateien, die ins Repository committed werden.
 - **Niemals Secrets ins Repo:** Die `.env`-Datei ist in `.gitignore` ausgeschlossen. Stelle sicher, dass sie niemals committet wird. Prüfe mit `git status`, ob sie unbeabsichtigt getrackt wird.
-- **`ADMIN_API_KEY` schützen:** Dieser Key erlaubt das Auslösen von Datenimporten. Verwende einen langen, zufälligen Wert und teile ihn nur mit vertrauenswürdigen Personen.
+- **`ADMIN_API_KEY` schützen:** Dieser Key erlaubt das Auslösen von Datenimporten sowie den Login
+  in der Admin-Weboberfläche (`/admin`). Verwende einen langen, zufälligen Wert und teile ihn nur
+  mit vertrauenswürdigen Personen.
+- **`SESSION_SECRET` schützen:** Signiert das Admin-Session-Cookie. Bei Kompromittierung rotieren
+  (z. B. in Render neu generieren lassen) – bestehende Sessions werden dadurch ungültig.
