@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     database_url: str = "postgresql+psycopg://sport:sport@localhost:5432/sportdb"
     admin_api_key: str = "change-me-admin-key"
+    session_secret: str = "change-me-session-secret"
     log_level: str = "INFO"
     enable_scheduler: bool = False
     openf1_base_url: str = "https://api.openf1.org/v1"
