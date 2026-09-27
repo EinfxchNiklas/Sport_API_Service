@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from collections import deque
 from datetime import datetime, timedelta, timezone
 
+from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED, EVENT_JOB_MISSED, JobExecutionEvent
+from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.config import settings
@@ -10,6 +13,10 @@ from app.logging_config import get_logger
 logger = get_logger(__name__)
 
 _scheduler: BackgroundScheduler | None = None
+
+# Ringpuffer der letzten Job-Ausführungen (neueste zuerst), nur In-Memory.
+_JOB_HISTORY_MAXLEN = 100
+_job_history: deque[dict] = deque(maxlen=_JOB_HISTORY_MAXLEN)
 
 # Puffer nach session.end_time bevor Ergebnisse bei OpenF1 verfügbar sind.
 _RESULTS_BUFFER = timedelta(minutes=15)
@@ -51,6 +58,9 @@ def start_scheduler() -> None:
             hours=1,
             id="hourly_f1_data_fetch",
             replace_existing=True,
+        )
+        scheduler.add_listener(
+            _record_job_event, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR | EVENT_JOB_MISSED
         )
         logger.info("Scheduler gestartet (Zeitzone: %s)", settings.timezone)
         logger.info("Nacht-Job 'nightly_session_status_update' registriert (täglich 03:00)")
@@ -309,3 +319,79 @@ def update_session_statuses() -> None:
         db.rollback()
     finally:
         db.close()
+
+
+def _record_job_event(event: JobExecutionEvent) -> None:
+    """APScheduler-Listener: hält eine In-Memory-Historie der letzten Jobläufe."""
+    if event.exception:
+        status_ = "error"
+        error = str(event.exception)
+    elif event.code == EVENT_JOB_MISSED:
+        status_ = "missed"
+        error = None
+    else:
+        status_ = "success"
+        error = None
+    _job_history.appendleft(
+        {
+            "job_id": event.job_id,
+            "status": status_,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "error": error,
+        }
+    )
+
+
+def get_job_history() -> list[dict]:
+    """Letzte Jobläufe (neueste zuerst), nur solange der Prozess läuft."""
+    return list(_job_history)
+
+
+def list_jobs() -> list[dict]:
+    """Alle registrierten Jobs mit Status für die Admin-UI."""
+    jobs = []
+    for job in get_scheduler().get_jobs():
+        jobs.append(
+            {
+                "id": job.id,
+                "name": job.name or job.id,
+                "trigger": str(job.trigger),
+                "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
+                # APScheduler setzt next_run_time auf None solange ein Job pausiert ist.
+                "paused": job.next_run_time is None,
+            }
+        )
+    return jobs
+
+
+def pause_job(job_id: str) -> None:
+    try:
+        get_scheduler().pause_job(job_id)
+    except JobLookupError as exc:
+        raise ValueError(f"Job '{job_id}' nicht gefunden") from exc
+
+
+def resume_job(job_id: str) -> None:
+    try:
+        get_scheduler().resume_job(job_id)
+    except JobLookupError as exc:
+        raise ValueError(f"Job '{job_id}' nicht gefunden") from exc
+
+
+def run_job_now(job_id: str) -> None:
+    """Lässt einen Job beim nächsten Scheduler-Tick sofort laufen (einmalig, ohne den regulären Zeitplan zu ändern)."""
+    scheduler = get_scheduler()
+    try:
+        scheduler.modify_job(job_id, next_run_time=datetime.now(scheduler.timezone))
+    except JobLookupError as exc:
+        raise ValueError(f"Job '{job_id}' nicht gefunden") from exc
+
+
+def scheduler_status() -> dict:
+    scheduler = get_scheduler()
+    return {
+        "running": scheduler.running,
+        "enabled": settings.enable_scheduler,
+        "timezone": str(scheduler.timezone),
+        "job_count": len(scheduler.get_jobs()),
+    }
