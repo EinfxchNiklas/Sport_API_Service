@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Architektur{% endblock %}
+{% block heading %}Architektur-Überblick{% endblock %}
+{% block head %}<script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>{% endblock %}
+{% block content %}
+<div class="card-header-row">
+  <div class="legend">
+    <span class="legend-item"><i class="dot dot-endpoint"></i> Endpunkt</span>
+    <span class="legend-item"><i class="dot dot-service"></i> Service</span>
+    <span class="legend-item"><i class="dot dot-datasource"></i> Datenquelle</span>
+    <span class="legend-item"><i class="dot dot-table"></i> DB-Tabelle</span>
+    <span class="legend-item"><i class="dot dot-job"></i> Scheduler-Job</span>
+  </div>
+  <button class="btn btn-primary" id="regenerate-btn">Neu generieren</button>
+</div>
+<div class="graph-layout">
+  <div id="cy" class="graph-canvas"></div>
+  <div id="node-info" class="card node-info">
+    <p class="muted">Knoten anklicken für Details.</p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/admin/static/graph.js"></script>{% endblock %}

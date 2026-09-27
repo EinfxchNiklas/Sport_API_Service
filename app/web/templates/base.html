@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Admin{% endblock %} · Sport Dashboard</title>
+  <link rel="stylesheet" href="/admin/static/styles.css" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span>Sport Dashboard</span>
+      </div>
+      <nav class="nav">
+        <a href="/admin" class="nav-link {% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="/admin/schedulers" class="nav-link {% if active == 'schedulers' %}active{% endif %}">Scheduler</a>
+        <a href="/admin/architecture" class="nav-link {% if active == 'architecture' %}active{% endif %}">Architektur</a>
+        <a href="/admin/endpoints" class="nav-link {% if active == 'endpoints' %}active{% endif %}">Endpunkte</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/docs" target="_blank" rel="noopener" class="nav-link nav-link-external">
+          Swagger-Doku
+          <span class="external-icon">↗</span>
+        </a>
+        <form action="/admin/logout" method="post" class="logout-form">
+          <button type="submit" class="btn btn-ghost btn-block">Abmelden</button>
+        </form>
+      </div>
+    </aside>
+    <main class="content">
+      <header class="topbar">
+        <h1>{% block heading %}{% endblock %}</h1>
+      </header>
+      <section class="page">
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+  <script src="/admin/static/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

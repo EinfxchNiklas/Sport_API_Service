@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Scheduler{% endblock %}
+{% block heading %}Scheduler{% endblock %}
+{% block content %}
+<div class="grid grid-cards" id="scheduler-status">
+  <div class="card skeleton">Lade…</div>
+</div>
+
+<div class="card-header-row">
+  <h2 class="section-title">Jobs</h2>
+  <button class="btn btn-ghost" id="refresh-jobs">Aktualisieren</button>
+</div>
+<table class="table" id="jobs-table">
+  <thead>
+    <tr><th>Job</th><th>Trigger</th><th>Nächster Lauf</th><th>Status</th><th>Aktionen</th></tr>
+  </thead>
+  <tbody><tr><td colspan="5">Lade…</td></tr></tbody>
+</table>
+
+<h2 class="section-title">Ausführungshistorie</h2>
+<table class="table" id="history-table">
+  <thead>
+    <tr><th>Zeitpunkt</th><th>Job</th><th>Status</th><th>Fehler</th></tr>
+  </thead>
+  <tbody><tr><td colspan="4">Lade…</td></tr></tbody>
+</table>
+{% endblock %}
+{% block scripts %}<script src="/admin/static/schedulers.js"></script>{% endblock %}

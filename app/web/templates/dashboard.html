@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid grid-cards" id="overview-cards">
+  <div class="card skeleton">Lade…</div>
+</div>
+
+<h2 class="section-title">Schnellaktionen</h2>
+<div class="grid grid-actions">
+  <div class="card action-card">
+    <h3>Bundesliga</h3>
+    <div class="field-row">
+      <label>Saison <input type="number" id="bl-season" value="2025" /></label>
+      <label>Liga-ID <input type="number" id="bl-league" value="78" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="bundesliga" data-params="bl-season:season,bl-league:league_id">Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>Fußball (komplett)</h3>
+    <div class="field-row">
+      <label>Saison <input type="number" id="fb-season" value="2025" /></label>
+      <label>Liga-ID <input type="number" id="fb-league" value="78" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="football" data-params="fb-season:season,fb-league:league_id">Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>F1 Rennen</h3>
+    <div class="field-row">
+      <label>Jahr <input type="number" id="f1r-year" value="2025" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="f1-races" data-params="f1r-year:year">Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>F1 Fahrer</h3>
+    <div class="field-row">
+      <label>Session-Key <input type="text" id="f1d-key" value="latest" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="f1-drivers" data-params="f1d-key:session_key">Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>F1 Sessions</h3>
+    <div class="field-row">
+      <label>Jahr <input type="number" id="f1s-year" value="2025" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="f1-sessions" data-params="f1s-year:year">Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>F1 Session-Ergebnisse</h3>
+    <div class="field-row">
+      <label>Session-Key <input type="number" id="f1sr-key" placeholder="z. B. 9636" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="f1-session-results" data-params="f1sr-key:session_key" data-body>Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>F1 Standings</h3>
+    <div class="field-row">
+      <label>Jahr <input type="number" id="f1st-year" value="2025" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="f1-standings" data-params="f1st-year:year">Berechnen</button>
+  </div>
+  <div class="card action-card">
+    <h3>NFL Teams</h3>
+    <button class="btn btn-primary" data-action="nfl-teams">Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>NFL Spiele</h3>
+    <div class="field-row">
+      <label>Woche <input type="number" id="nflg-week" value="1" /></label>
+      <label>Saison <input type="number" id="nflg-season" value="2025" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="nfl-games-new" data-params="nflg-week:week,nflg-season:season">Importieren</button>
+  </div>
+  <div class="card action-card">
+    <h3>NFL Standings</h3>
+    <div class="field-row">
+      <label>Saison <input type="number" id="nflst-season" value="2025" /></label>
+    </div>
+    <button class="btn btn-primary" data-action="nfl-standings" data-params="nflst-season:season">Importieren</button>
+  </div>
+</div>
+
+<h2 class="section-title">Aktivitätsprotokoll</h2>
+<pre id="action-log" class="log-panel">Noch keine Aktionen ausgeführt.</pre>
+{% endblock %}
+{% block scripts %}<script src="/admin/static/dashboard.js"></script>{% endblock %}

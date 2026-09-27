@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login · Sport Dashboard Admin</title>
+  <link rel="stylesheet" href="/admin/static/styles.css" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="brand brand-center">
+      <span class="brand-dot"></span>
+      <span>Sport Dashboard</span>
+    </div>
+    <h1>Admin-Login</h1>
+    <p class="muted">Bitte Admin-API-Key eingeben.</p>
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+    <form method="post" action="/admin/login">
+      <label for="api_key">API-Key</label>
+      <input id="api_key" name="api_key" type="password" autocomplete="current-password" required autofocus />
+      <button type="submit" class="btn btn-primary btn-block">Anmelden</button>
+    </form>
+  </div>
+</body>
+</html>
