@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -16,6 +17,8 @@ from app.services.datasources import OpenF1Client
 
 logger = get_logger(__name__)
 _BERLIN = ZoneInfo("Europe/Berlin")
+# OpenF1 Free-Tier: max. 30 Requests/Minute -> 2s Abstand + Puffer
+_OPENF1_REQUEST_INTERVAL_SECONDS = 2.1
 
 
 def _parse_dt(value) -> datetime | None:
@@ -156,7 +159,10 @@ def import_f1_sessions(db: Session, year: int) -> dict:
 
     races = db.query(Race).filter(Race.season == str(year), Race.external_id.isnot(None)).all()
     with OpenF1Client() as client:
-        for race in races:
+        for i, race in enumerate(races):
+            if i > 0:
+                # OpenF1 Free-Tier erlaubt nur 30 Requests/Minute -> min. 2s Abstand nötig
+                time.sleep(_OPENF1_REQUEST_INTERVAL_SECONDS)
             c, u = _import_sessions_for_race(db, race, client)
             created += c
             updated += u
