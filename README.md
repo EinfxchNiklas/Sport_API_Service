@@ -19,8 +19,8 @@ Eine zentrale REST-API für Sport-Live- und Historikdaten. Aktuell unterstützte
 - Admin-Endpunkte zum Auslösen von Datenimporten (geschützt per `X-API-Key`)
 - Gesicherte Admin-Weboberfläche (`/admin`) mit Dashboard, Scheduler-Verwaltung und interaktivem Architektur-Graph
 - Hintergrundaufgaben mit APScheduler
-- Deployment-Ready für [Render](https://render.com) (`render.yaml`)
-- Lokale Entwicklung mit Docker Compose (PostgreSQL + pgAdmin)
+- Render-Deployment mit externer PostgreSQL-Datenbank, z. B. [Neon](https://neon.com) (`render.yaml`)
+- Lokale Entwicklung mit separater Neon-DEV-Datenbank; Docker Compose ist eine optionale Alternative
 
 ---
 
@@ -47,7 +47,7 @@ Sport_Dashboard_API/
 ├── main.py                    # Anwendungs-Einstiegspunkt (FastAPI + Lifespan)
 ├── requirements.txt
 ├── alembic.ini
-├── docker-compose.yml         # Lokale DB: PostgreSQL + pgAdmin
+├── docker-compose.yml         # Optionale lokale DB: PostgreSQL + pgAdmin
 ├── render.yaml                # Render-Deployment-Blueprint
 ├── .env.example               # Vorlage für Umgebungsvariablen
 ├── app/
@@ -84,18 +84,19 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-Öffne `.env` und trage deine Werte ein – insbesondere `DATABASE_URL`, `ADMIN_API_KEY` und die API-Keys für die Datenquellen.
+Nur ausführen, wenn noch keine `.env` vorhanden ist; eine bestehende Datei mit eigenen Werten nicht überschreiben.
+Öffne `.env` und trage deine Werte ein – insbesondere den Connection-String der **Neon-DEV-Datenbank** in `DATABASE_URL`, `ADMIN_API_KEY` und die API-Keys für die Datenquellen.
 Details: [docs/datenquellen.md](docs/datenquellen.md)
 
-### 3. Datenbank starten (Docker)
+### 3. DEV-Datenbank einrichten
 
-```powershell
-docker compose up -d
-```
+Erstelle ein separates Neon-Projekt für DEV. Kopiere unter **Connect** die direkte PostgreSQL-URL ohne `psql` und äußere Anführungszeichen einschließlich der Verbindungsparameter in `DATABASE_URL`. Die URL enthält Zugangsdaten und darf nicht veröffentlicht werden. Für Neon ist eine Internetverbindung erforderlich.
 
-Details zur Docker-Einrichtung (auch für Einsteiger): [docs/docker-anleitung.md](docs/docker-anleitung.md)
+Alternativ kannst du eine lokale Datenbank mit Docker verwenden: [docs/docker-anleitung.md](docs/docker-anleitung.md). Weitere Details zu Neon und zum lokalen Setup: [docs/entwicklung.md](docs/entwicklung.md).
 
 ### 4. Migrationen ausführen
+
+Prüfe zuerst, dass `DATABASE_URL` auf DEV und nicht auf PROD zeigt:
 
 ```powershell
 alembic upgrade head
@@ -177,10 +178,10 @@ Die Admin-Weboberfläche (`/admin`) nutzt zusätzlich ein signiertes Session-Coo
 | Dokument                                          | Inhalt                                      |
 |---------------------------------------------------|---------------------------------------------|
 | [docs/entwicklung.md](docs/entwicklung.md)        | Lokales Setup, Tests, neue Migrationen      |
-| [docs/docker-anleitung.md](docs/docker-anleitung.md) | Docker-Einrichtung für Einsteiger        |
+| [docs/docker-anleitung.md](docs/docker-anleitung.md) | Optionale lokale Docker-Datenbank        |
 | [docs/api.md](docs/api.md)                        | Vollständige API-Referenz                   |
 | [docs/datenquellen.md](docs/datenquellen.md)      | OpenF1, API-Football, Tank01 – Keys & Setup |
-| [docs/deployment.md](docs/deployment.md)          | Deployment auf Render                       |
+| [docs/deployment.md](docs/deployment.md)          | Deployment auf Render mit Neon              |
 
 ---
 

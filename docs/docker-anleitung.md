@@ -2,9 +2,11 @@
 
 Diese Anleitung richtet sich an Nutzer, die noch keine Erfahrung mit Docker haben. Sie erklärt Schritt für Schritt, wie Docker Desktop unter Windows installiert wird und wie damit die lokale PostgreSQL-Datenbank für die Sport Dashboard API gestartet wird.
 
+**Docker ist optional:** Für die Entwicklung kann stattdessen eine separate Neon-DEV-Datenbank verwendet werden. Dann sind Docker Desktop und die Befehle in dieser Anleitung nicht erforderlich. Siehe [entwicklung.md](entwicklung.md).
+
 ---
 
-## Was ist Docker und warum brauchen wir es?
+## Was ist Docker und wofür können wir es nutzen?
 
 Docker ist eine Software, mit der man Anwendungen in sogenannten **Containern** ausführen kann. Ein Container ist eine isolierte, leichtgewichtige Laufzeitumgebung – ähnlich einer kleinen virtuellen Maschine, aber ohne das gesamte Betriebssystem.
 
@@ -145,7 +147,7 @@ Wenn beide Befehle eine Versionsnummer ausgeben, ist Docker korrekt installiert.
 > **Hinweis – Hostname innerhalb vs. außerhalb Docker:**
 > - `postgres` funktioniert, wenn pgAdmin selbst als Docker-Container läuft (was hier der Fall ist). Die Container kommunizieren im selben Docker-Netzwerk.
 > - `localhost` oder `host.docker.internal` würde man verwenden, wenn man sich von außerhalb Docker (z. B. von einem lokalen Tool auf Windows) mit der Datenbank verbindet.
-> - Die `DATABASE_URL` in deiner `.env`-Datei nutzt `localhost:5432`, weil die Python-App direkt auf Windows läuft (außerhalb Docker).
+> - Bei Nutzung der **Docker-Datenbank** muss `DATABASE_URL` in deiner `.env` auf `localhost:5432` zeigen, weil die Python-App direkt auf Windows läuft. Eine Neon-URL verbindet dagegen weiterhin mit Neon, auch wenn die Docker-Container gestartet sind. Die lokale URL steht in `.env.example`.
 
 ---
 

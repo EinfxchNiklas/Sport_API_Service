@@ -1,9 +1,3 @@
-databases:
-  - name: sport-dashboard-db
-    plan: free
-    databaseName: sportdb
-    user: sport
-
 services:
   - type: web
     name: sport-dashboard-api
@@ -14,9 +8,7 @@ services:
     healthCheckPath: /api/v1/health
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: sport-dashboard-db
-          property: connectionString
+        sync: false
       - key: ADMIN_API_KEY
         generateValue: true
       - key: SESSION_SECRET

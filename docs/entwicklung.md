@@ -7,7 +7,7 @@ Diese Anleitung beschreibt, wie du die Sport Dashboard API lokal zum Laufen brin
 ## Voraussetzungen
 
 - Python 3.14 (oder kompatibel)
-- Docker Desktop (für die lokale Datenbank) → siehe [docker-anleitung.md](docker-anleitung.md)
+- Ein separates Neon-DEV-Projekt und eine Internetverbindung; alternativ Docker Desktop für eine lokale Datenbank → siehe [docker-anleitung.md](docker-anleitung.md)
 - Git
 
 ---
@@ -41,13 +41,13 @@ pip install -r requirements.txt
 
 ## Schritt 3: Umgebungsvariablen konfigurieren
 
-Kopiere die Beispieldatei und trage deine Werte ein:
+Falls noch keine `.env` existiert, kopiere die Beispieldatei und trage deine Werte ein:
 
 ```powershell
 copy .env.example .env
 ```
 
-Öffne `.env` in einem Texteditor und fülle alle Felder aus. Eine Übersicht der Variablen:
+Eine bestehende `.env` mit eigenen Werten nicht überschreiben. Öffne sie in einem Texteditor und trage deine Werte ein. Eine Übersicht der Variablen:
 
 | Variable               | Beschreibung                                                   |
 |------------------------|----------------------------------------------------------------|
@@ -68,21 +68,19 @@ copy .env.example .env
 
 ---
 
-## Schritt 4: Datenbank starten
+## Schritt 4: DEV-Datenbank einrichten
 
-Starte die PostgreSQL-Datenbank via Docker:
+Erstelle bei [Neon](https://neon.com) ein separates DEV-Projekt, z. B. `sport-dashboard-dev`. Wähle im Projekt unter **Connect** Branch, Datenbank und Rolle und deaktiviere **Connection pooling** für die direkte Verbindung. Kopiere die URL ab `postgresql://` einschließlich aller Verbindungsparameter, ohne `psql` und ohne äußere Anführungszeichen, als Wert von `DATABASE_URL` in die lokale `.env`.
 
-```powershell
-docker compose up -d
-```
+Der Connection-String enthält Zugangsdaten: nicht ins Repository oder in Nachrichten kopieren. Verwende für DEV niemals den Connection-String des separaten PROD-Projekts. Neon benötigt eine Internetverbindung; bei Inaktivität schläft die Recheninstanz ein und startet beim nächsten Zugriff automatisch.
 
-Detaillierte Anleitung zur Docker-Einrichtung (inkl. Installation): [docker-anleitung.md](docker-anleitung.md)
+Alternativ kann PostgreSQL lokal über Docker gestartet werden. Dazu muss `DATABASE_URL` in `.env` auf die lokale Docker-Datenbank zeigen. Detaillierte Anleitung: [docker-anleitung.md](docker-anleitung.md).
 
 ---
 
 ## Schritt 5: Datenbankmigrationen ausführen
 
-Erstelle alle Tabellen in der Datenbank:
+Prüfe vor jedem Migrationslauf, dass `DATABASE_URL` auf die gewünschte **DEV-Datenbank** zeigt. Die Migration ändert die Datenbank, auf die diese URL verweist:
 
 ```powershell
 alembic upgrade head
@@ -110,6 +108,7 @@ Die API ist nun unter [http://localhost:8000](http://localhost:8000) erreichbar.
 
 - **Swagger UI** (interaktive API-Doku): [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc** (alternative Doku): [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Datenbankverbindung prüfen:** [http://localhost:8000/api/v1/f1/drivers](http://localhost:8000/api/v1/f1/drivers) aufrufen; eine leere Liste ist bei einer neuen Datenbank normal. `/api/v1/health` allein prüft keine Datenbankverbindung.
 
 ---
 
@@ -125,7 +124,7 @@ Alle Tests befinden sich im Verzeichnis `tests/`.
 
 ## Neue Datenbankmigration erstellen
 
-Wenn du ein Datenbankmodell geändert hast, erstelle eine neue Migration:
+Wenn du ein Datenbankmodell geändert hast, prüfe zuerst, dass `DATABASE_URL` auf DEV zeigt, und erstelle eine neue Migration:
 
 ```powershell
 alembic revision --autogenerate -m "Kurze Beschreibung der Änderung"
@@ -144,32 +143,30 @@ alembic upgrade head
 ### Feierabend – Alles sauber beenden
 
 1. **FastAPI-Server stoppen** – im Terminal mit `Strg+C`
-2. **Docker-Container stoppen** (Daten bleiben erhalten):
+2. **Nur bei Verwendung von Docker:** Container stoppen (Daten bleiben erhalten):
    ```powershell
    docker compose stop
    ```
 
 Der Scheduler läuft im selben Prozess wie FastAPI und stoppt automatisch mit dem Server.
 
-> `docker compose stop` hält die Container an, löscht sie aber nicht. Die Datenbank-Daten im Volume `postgres_data` bleiben vollständig erhalten.
+Bei Neon musst du die Datenbank nicht manuell stoppen. `docker compose stop` hält dagegen die lokalen Container an; ihre Daten im Volume `postgres_data` bleiben erhalten.
 
 ---
 
 ### Nächster Tag – Wieder loslegen
 
-1. **Docker-Desktop starten:**
-
-2. **Docker-Container starten:**
+1. **Nur bei Verwendung von Docker:** Docker Desktop und anschließend die Container starten:
    ```powershell
    docker compose up -d
    ```
-3. **Virtuelle Umgebung aktivieren** (falls noch nicht aktiv):
+2. **Virtuelle Umgebung aktivieren** (falls noch nicht aktiv):
    ```powershell
    .venv\Scripts\activate
    ```
-4. **FastAPI-Server starten:**
+3. **FastAPI-Server starten:**
    ```powershell
    uvicorn main:app --reload
    ```
 
-Die Schritte 4–6 (Migrationen, Seed-Daten) sind nur beim ersten Einrichten nötig – nicht bei jedem Start.
+Migrationen sind beim ersten Einrichten und erneut nach neuen Migrationen nötig. Seed-Daten sind optional und müssen nicht bei jedem Start eingespielt werden.
