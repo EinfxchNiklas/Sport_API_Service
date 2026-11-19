@@ -12,8 +12,12 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     enable_scheduler: bool = False
     openf1_base_url: str = "https://api.openf1.org/v1"
-    api_football_key: str = ""
-    api_football_base_url: str = "https://v3.football.api-sports.io"
+    whoscored_enabled: bool = True
+    whoscored_leagues: str = "GER-Bundesliga"
+    whoscored_headless: bool = True
+    whoscored_browser_path: str | None = None
+    whoscored_data_dir: str | None = None
+    whoscored_lock_timeout_seconds: int = 1800
     tank01_key: str = ""
     tank01_host: str = "tank01-nfl-live-in-game-real-time-statistics-nfl.p.rapidapi.com"
     timezone: str = "Europe/Berlin"
@@ -27,6 +31,10 @@ class Settings(BaseSettings):
             if v.startswith("postgresql://"):
                 return "postgresql+psycopg://" + v[len("postgresql://"):]
         return v
+
+    @property
+    def whoscored_league_list(self) -> list[str]:
+        return [part.strip() for part in self.whoscored_leagues.split(",") if part.strip()]
 
     model_config = SettingsConfigDict(
         env_file=".env",

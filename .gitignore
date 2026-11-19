@@ -35,5 +35,8 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+# seleniumbase (WhoScored-Scraper) legt diesen Ordner im Arbeitsverzeichnis an
+downloaded_files/
+
 # Alembic temporary SQLite DB (local testing only)
 _alembic_tmp.db
