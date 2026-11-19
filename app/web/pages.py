@@ -42,7 +42,14 @@ def logout(request: Request):
 def dashboard(request: Request):
     if not is_logged_in(request):
         return _redirect_to_login()
-    return templates.TemplateResponse(request, "dashboard.html", {"active": "dashboard"})
+    from app.services.football_competitions import COMPETITIONS, current_season_code
+
+    leagues = [{"key": c.league_key, "name": c.name} for c in COMPETITIONS.values()]
+    return templates.TemplateResponse(
+        request,
+        "dashboard.html",
+        {"active": "dashboard", "leagues": leagues, "current_season": current_season_code()},
+    )
 
 
 @router.get("/admin/schedulers")

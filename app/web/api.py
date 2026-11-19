@@ -1,10 +1,24 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, require_admin
-from app.models import Competition, Driver, Match, NflGame, NflTeam, Race, RaceSession, Team
+from app.models import (
+    Appearance,
+    Competition,
+    Driver,
+    Match,
+    MissingPlayer,
+    NflGame,
+    NflTeam,
+    Player,
+    Race,
+    RaceSession,
+    Team,
+)
 from app.schedulers.scheduler import (
     get_job_history,
     list_jobs,
@@ -13,6 +27,7 @@ from app.schedulers.scheduler import (
     run_job_now,
     scheduler_status,
 )
+from app.services import background_jobs, football_jobs
 from app.services.f1_service import (
     import_f1_drivers,
     import_f1_races,
@@ -20,9 +35,7 @@ from app.services.f1_service import (
     import_f1_sessions,
     import_f1_standings,
 )
-from app.services.football_service import import_bundesliga, import_football_competition
 from app.services.nfl_service import (
-    import_nfl_games,
     import_nfl_games_new,
     import_nfl_standings,
     import_nfl_teams,
@@ -35,6 +48,9 @@ _COUNT_TABLES = [
     ("Wettbewerbe", Competition),
     ("Teams", Team),
     ("Spiele", Match),
+    ("Spieler", Player),
+    ("Einsätze", Appearance),
+    ("Fehlende Spieler", MissingPlayer),
     ("F1-Fahrer", Driver),
     ("F1-Rennen", Race),
     ("F1-Sessions", RaceSession),
@@ -100,16 +116,6 @@ def _run_action(fn, **kwargs):
         return {"ok": False, "error": str(exc)}
 
 
-@router.post("/actions/bundesliga")
-def action_bundesliga(season: int = 2025, league_id: int = 78, db: Session = Depends(get_db)):
-    return _run_action(import_bundesliga, db=db, season=season, league_id=league_id)
-
-
-@router.post("/actions/football")
-def action_football(league_id: int = 78, season: int = 2025, db: Session = Depends(get_db)):
-    return _run_action(import_football_competition, db=db, league_id=league_id, season=season)
-
-
 @router.post("/actions/f1-races")
 def action_f1_races(year: int = 2025, db: Session = Depends(get_db)):
     return _run_action(import_f1_races, db=db, year=year)
@@ -143,15 +149,6 @@ def action_nfl_teams(db: Session = Depends(get_db)):
     return _run_action(import_nfl_teams, db=db)
 
 
-@router.post("/actions/nfl-games")
-def action_nfl_games(
-    game_week: int = 1, season: int = 2025, season_type: str = "reg", db: Session = Depends(get_db)
-):
-    return _run_action(
-        import_nfl_games, db=db, game_week=game_week, season=season, season_type=season_type
-    )
-
-
 @router.post("/actions/nfl-games-new")
 def action_nfl_games_new(
     week: int = 1, season: int = 2025, season_type: str = "reg", db: Session = Depends(get_db)
@@ -159,6 +156,40 @@ def action_nfl_games_new(
     return _run_action(
         import_nfl_games_new, db=db, game_week=week, season=season, season_type=season_type
     )
+
+
+@router.get("/jobs")
+def api_jobs(limit: int = 50):
+    return {"jobs": background_jobs.list_jobs(limit=limit)}
+
+
+def _submit_job(submit, **kwargs):
+    """Startet einen Hintergrund-Job; Fehler (ungültige Liga, laufender Job) landen im UI-Format."""
+    try:
+        return {"ok": True, "result": {"job_id": submit(**kwargs)}}
+    except (ValueError, background_jobs.JobConflictError) as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+@router.post("/actions/football-season")
+def action_football_season(
+    league: str = "GER-Bundesliga",
+    season: Optional[str] = None,
+    with_details: bool = True,
+    max_matches: Optional[int] = None,
+):
+    return _submit_job(
+        football_jobs.submit_season_import,
+        league=league,
+        season=season or None,
+        with_details=with_details,
+        max_matches=max_matches,
+    )
+
+
+@router.post("/actions/football-match")
+def action_football_match(ws_match_id: int, final: bool = False):
+    return _submit_job(football_jobs.submit_match_sync, ws_match_id=ws_match_id, final=final)
 
 
 @router.post("/actions/nfl-standings")

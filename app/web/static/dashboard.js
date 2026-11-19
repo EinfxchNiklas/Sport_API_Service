@@ -27,9 +27,55 @@
       const [inputId, key] = pair.split(":");
       const input = document.getElementById(inputId);
       if (!input) continue;
+      if (input.type === "checkbox") {
+        params[key] = input.checked;
+        continue;
+      }
+      if (input.hasAttribute("data-optional") && input.value === "") continue;
       params[key] = input.type === "number" ? Number(input.value) : input.value;
     }
     return params;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleString("de-DE");
+  }
+
+  const JOB_BADGES = { success: "badge-ok", running: "badge-warn", queued: "badge-warn", error: "badge-error" };
+
+  async function loadJobs() {
+    const el = document.getElementById("jobs-list");
+    if (!el) return;
+    try {
+      const data = await fetchJSON("/admin/api/jobs");
+      if (!data.jobs.length) {
+        el.innerHTML = `<p class="muted">Keine Hintergrund-Jobs.</p>`;
+        return;
+      }
+      const rows = data.jobs
+        .map((job) => {
+          const detail = job.error
+            ? escapeHtml(job.error)
+            : job.result
+              ? escapeHtml(JSON.stringify(job.result))
+              : "—";
+          return `<tr>
+            <td class="mono">${escapeHtml(job.id)}</td>
+            <td>${escapeHtml(job.name)}</td>
+            <td><span class="badge ${JOB_BADGES[job.status] || "badge-warn"}">${escapeHtml(job.status)}</span></td>
+            <td>${fmtDate(job.started_at)}</td>
+            <td>${fmtDate(job.finished_at)}</td>
+            <td class="mono">${detail}</td>
+          </tr>`;
+        })
+        .join("");
+      el.innerHTML = `<table class="table">
+        <thead><tr><th>ID</th><th>Job</th><th>Status</th><th>Start</th><th>Ende</th><th>Ergebnis / Fehler</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+    } catch (err) {
+      el.innerHTML = `<p class="muted">Fehler beim Laden der Jobs: ${escapeHtml(err.message)}</p>`;
+    }
   }
 
   function log(message) {
@@ -63,6 +109,7 @@
           log(`${action} FEHLER → ${result.error}`);
         }
         loadOverview();
+        loadJobs();
       } catch (err) {
         toast(`${action}: ${err.message}`, "error");
         log(`${action} FEHLER → ${err.message}`);
@@ -74,4 +121,6 @@
   });
 
   loadOverview();
+  loadJobs();
+  setInterval(loadJobs, 5000);
 })();

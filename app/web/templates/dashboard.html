@@ -9,22 +9,6 @@
 <h2 class="section-title">Schnellaktionen</h2>
 <div class="grid grid-actions">
   <div class="card action-card">
-    <h3>Bundesliga</h3>
-    <div class="field-row">
-      <label>Saison <input type="number" id="bl-season" value="2025" /></label>
-      <label>Liga-ID <input type="number" id="bl-league" value="78" /></label>
-    </div>
-    <button class="btn btn-primary" data-action="bundesliga" data-params="bl-season:season,bl-league:league_id">Importieren</button>
-  </div>
-  <div class="card action-card">
-    <h3>Fußball (komplett)</h3>
-    <div class="field-row">
-      <label>Saison <input type="number" id="fb-season" value="2025" /></label>
-      <label>Liga-ID <input type="number" id="fb-league" value="78" /></label>
-    </div>
-    <button class="btn btn-primary" data-action="football" data-params="fb-season:season,fb-league:league_id">Importieren</button>
-  </div>
-  <div class="card action-card">
     <h3>F1 Rennen</h3>
     <div class="field-row">
       <label>Jahr <input type="number" id="f1r-year" value="2025" /></label>
@@ -79,6 +63,44 @@
     <button class="btn btn-primary" data-action="nfl-standings" data-params="nflst-season:season">Importieren</button>
   </div>
 </div>
+
+<h2 class="section-title">Fußball (WhoScored)</h2>
+<div class="grid grid-actions">
+  <div class="card action-card">
+    <h3>Saison-Import</h3>
+    <div class="field-row">
+      <label>Liga
+        <select id="fbs-league">
+          {% for league in leagues %}
+          <option value="{{ league.key }}"{% if league.key == "GER-Bundesliga" %} selected{% endif %}>{{ league.name }} ({{ league.key }})</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="field-row">
+      <label>Saison <input type="text" id="fbs-season" value="{{ current_season }}" /></label>
+      <label>Max. Spiele <input type="number" id="fbs-max" min="1" placeholder="alle" data-optional /></label>
+    </div>
+    <div class="field-row">
+      <label class="field-check"><input type="checkbox" id="fbs-details" checked /> Spieldetails laden</label>
+    </div>
+    <button class="btn btn-primary" data-action="football-season" data-params="fbs-league:league,fbs-season:season,fbs-max:max_matches,fbs-details:with_details">Import starten</button>
+    <span class="muted">Läuft im Hintergrund (mehrere Minuten).</span>
+  </div>
+  <div class="card action-card">
+    <h3>Einzelnes Spiel synchronisieren</h3>
+    <div class="field-row">
+      <label>WhoScored-Match-ID <input type="number" id="fbm-id" placeholder="z. B. 1821234" /></label>
+    </div>
+    <div class="field-row">
+      <label class="field-check"><input type="checkbox" id="fbm-final" /> Endgültig (final)</label>
+    </div>
+    <button class="btn btn-primary" data-action="football-match" data-params="fbm-id:ws_match_id,fbm-final:final">Synchronisieren</button>
+  </div>
+</div>
+
+<h2 class="section-title">Hintergrund-Jobs</h2>
+<div id="jobs-list"><p class="muted">Lade…</p></div>
 
 <h2 class="section-title">Aktivitätsprotokoll</h2>
 <pre id="action-log" class="log-panel">Noch keine Aktionen ausgeführt.</pre>

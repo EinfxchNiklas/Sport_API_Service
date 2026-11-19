@@ -16,8 +16,7 @@
           visited.add(node.id);
           if (node.type === targetType) found.push(node);
           // Weiter traversieren solange es ein Service ist – auch wenn der
-          // Service selbst schon das gesuchte targetType ist (z. B. Service-Ketten
-          // wie import_football_competition -> import_bundesliga -> ... -> Tabelle).
+          // Service-Ketten (Service -> Service -> ... -> Tabelle).
           if (node.type === "service") queue.push(node.id);
         });
     }
