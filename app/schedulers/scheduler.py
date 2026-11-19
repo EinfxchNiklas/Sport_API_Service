@@ -65,6 +65,10 @@ def start_scheduler() -> None:
         logger.info("Scheduler gestartet (Zeitzone: %s)", settings.timezone)
         logger.info("Nacht-Job 'nightly_session_status_update' registriert (täglich 03:00)")
         logger.info("Stündlicher Job 'hourly_f1_data_fetch' registriert")
+        if settings.whoscored_enabled:
+            from app.schedulers import football_jobs
+
+            football_jobs.register_jobs(scheduler)
 
 
 def shutdown_scheduler() -> None:
@@ -72,61 +76,6 @@ def shutdown_scheduler() -> None:
     if scheduler.running:
         scheduler.shutdown(wait=False)
         logger.info("Scheduler heruntergefahren")
-
-
-def schedule_match_monitor(
-    match_id: int,
-    kickoff_time: datetime,
-    duration_minutes: int = 110,
-    check_interval_minutes: int = 2,
-) -> str:
-    estimated_end = kickoff_time + timedelta(minutes=duration_minutes)
-    job_id = f"match-{match_id}"
-    get_scheduler().add_job(
-        _check_match_finished,
-        args=[match_id],
-        trigger="interval",
-        minutes=check_interval_minutes,
-        start_date=estimated_end,
-        id=job_id,
-        replace_existing=True,
-    )
-    logger.info(
-        "Match-Monitor geplant: Job '%s', Start ab %s, Intervall %d min",
-        job_id,
-        estimated_end.isoformat(),
-        check_interval_minutes,
-    )
-    return job_id
-
-
-def _check_match_finished(match_id: int) -> None:
-    from app.database.session import SessionLocal
-    from app.models.match import Match
-
-    FINISHED_STATUSES = {"FT", "AET", "PEN", "finished", "final", "Final"}
-    session = SessionLocal()
-    try:
-        match = session.get(Match, match_id)
-        if match is None:
-            logger.warning("_check_match_finished: Match %d nicht gefunden", match_id)
-            return
-        if match.status in FINISHED_STATUSES:
-            job_id = f"match-{match_id}"
-            try:
-                get_scheduler().remove_job(job_id)
-            except Exception:
-                pass
-            logger.info(
-                "Match %d ist beendet (Status: %s) — Job '%s' entfernt",
-                match_id,
-                match.status,
-                job_id,
-            )
-    except Exception as exc:
-        logger.exception("Fehler in _check_match_finished für Match %d: %s", match_id, exc)
-    finally:
-        session.close()
 
 
 def fetch_missing_f1_data() -> None:

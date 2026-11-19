@@ -1,6 +1,3 @@
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
 import pytest
 
 import app.schedulers.scheduler as scheduler_module
@@ -11,12 +8,17 @@ from app.schedulers.scheduler import (
     pause_job,
     resume_job,
     run_job_now,
-    schedule_match_monitor,
     scheduler_status,
     shutdown_scheduler,
 )
 
-BERLIN = ZoneInfo("Europe/Berlin")
+
+def _dummy_job() -> None:
+    return None
+
+
+def _add_dummy(job_id: str) -> None:
+    get_scheduler().add_job(_dummy_job, trigger="interval", hours=1, id=job_id, replace_existing=True)
 
 
 @pytest.fixture(autouse=True)
@@ -46,40 +48,15 @@ def test_scheduler_timezone_berlin():
     assert "Europe/Berlin" in tz_key
 
 
-def test_schedule_match_monitor_adds_job():
-    kickoff = datetime(2026, 8, 1, 18, 0, 0, tzinfo=BERLIN)
-    job_id = schedule_match_monitor(match_id=1, kickoff_time=kickoff)
-
-    assert job_id == "match-1"
-    job = get_scheduler().get_job("match-1")
-    assert job is not None
-    assert job.id == "match-1"
-
-
-def test_schedule_match_monitor_replaces_existing_job():
-    s = get_scheduler()
-    s.start()
-    try:
-        kickoff = datetime(2026, 8, 1, 18, 0, 0, tzinfo=BERLIN)
-        schedule_match_monitor(match_id=1, kickoff_time=kickoff)
-        schedule_match_monitor(match_id=1, kickoff_time=kickoff, duration_minutes=120)
-
-        jobs = [j for j in s.get_jobs() if j.id == "match-1"]
-        assert len(jobs) == 1
-    finally:
-        s.shutdown(wait=False)
-
-
 def test_list_jobs_reflects_registered_jobs():
     s = get_scheduler()
     s.start()
     try:
-        kickoff = datetime(2026, 8, 1, 18, 0, 0, tzinfo=BERLIN)
-        schedule_match_monitor(match_id=42, kickoff_time=kickoff)
+        _add_dummy("dummy-42")
         jobs = list_jobs()
         job_ids = {j["id"] for j in jobs}
-        assert "match-42" in job_ids
-        entry = next(j for j in jobs if j["id"] == "match-42")
+        assert "dummy-42" in job_ids
+        entry = next(j for j in jobs if j["id"] == "dummy-42")
         assert entry["paused"] is False
         assert "trigger" in entry
     finally:
@@ -90,15 +67,14 @@ def test_pause_and_resume_job():
     s = get_scheduler()
     s.start()
     try:
-        kickoff = datetime(2026, 8, 1, 18, 0, 0, tzinfo=BERLIN)
-        schedule_match_monitor(match_id=7, kickoff_time=kickoff)
+        _add_dummy("dummy-7")
 
-        pause_job("match-7")
-        paused = next(j for j in list_jobs() if j["id"] == "match-7")
+        pause_job("dummy-7")
+        paused = next(j for j in list_jobs() if j["id"] == "dummy-7")
         assert paused["paused"] is True
 
-        resume_job("match-7")
-        resumed = next(j for j in list_jobs() if j["id"] == "match-7")
+        resume_job("dummy-7")
+        resumed = next(j for j in list_jobs() if j["id"] == "dummy-7")
         assert resumed["paused"] is False
     finally:
         s.shutdown(wait=False)
