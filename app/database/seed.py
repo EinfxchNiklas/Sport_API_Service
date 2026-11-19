@@ -4,23 +4,44 @@ from zoneinfo import ZoneInfo
 from sqlalchemy.orm import Session
 
 from app.logging_config import get_logger
-from app.models import Base, Competition, Driver, Match, NflTeam, Race, Team
+from app.models import (
+    Base,
+    Competition,
+    Driver,
+    Match,
+    NflTeam,
+    Race,
+    Region,
+    Season,
+    Stage,
+    Team,
+)
 
 _BERLIN = ZoneInfo("Europe/Berlin")
 logger = get_logger(__name__)
 
 
 def seed(db: Session) -> None:
+    # Region
+    region = db.query(Region).filter_by(ws_region_id=81).first()
+    if region is None:
+        region = Region(ws_region_id=81, name="Germany")
+        db.add(region)
+        db.flush()
+        logger.info("Inserted Region: Germany")
+    else:
+        logger.info("Skipped Region: Germany (already exists)")
+
     # Competition
-    competition = db.query(Competition).filter_by(
-        name="Bundesliga", sport="football", season="2025"
-    ).first()
+    competition = db.query(Competition).filter_by(ws_tournament_id=3).first()
     if competition is None:
         competition = Competition(
+            ws_tournament_id=3,
+            region_id=region.id,
+            league_key="GER-Bundesliga",
             name="Bundesliga",
-            sport="football",
-            country="Germany",
-            season="2025",
+            slug="bundesliga",
+            format="league",
         )
         db.add(competition)
         db.flush()
@@ -28,10 +49,30 @@ def seed(db: Session) -> None:
     else:
         logger.info("Skipped Competition: Bundesliga (already exists)")
 
-    # Teams
+    # Season (ws_season_id ist ein Platzhalter)
+    season = db.query(Season).filter_by(competition_id=competition.id, code="2627").first()
+    if season is None:
+        season = Season(competition_id=competition.id, ws_season_id=999001, code="2627")
+        db.add(season)
+        db.flush()
+        logger.info("Inserted Season: Bundesliga 2627")
+    else:
+        logger.info("Skipped Season: Bundesliga 2627 (already exists)")
+
+    # Stage (ws_stage_id ist ein Platzhalter)
+    stage = db.query(Stage).filter_by(season_id=season.id, is_default=True).first()
+    if stage is None:
+        stage = Stage(season_id=season.id, ws_stage_id=999001, name="Bundesliga", is_default=True)
+        db.add(stage)
+        db.flush()
+        logger.info("Inserted Stage: Bundesliga 2627 (default)")
+    else:
+        logger.info("Skipped Stage: Bundesliga 2627 (already exists)")
+
+    # Teams (ws_team_id sind Platzhalter)
     fcb = db.query(Team).filter_by(name="FC Bayern München").first()
     if fcb is None:
-        fcb = Team(name="FC Bayern München", short_name="FCB", country="Germany")
+        fcb = Team(ws_team_id=999001, name="FC Bayern München")
         db.add(fcb)
         db.flush()
         logger.info("Inserted Team: FC Bayern München")
@@ -40,18 +81,18 @@ def seed(db: Session) -> None:
 
     bvb = db.query(Team).filter_by(name="Borussia Dortmund").first()
     if bvb is None:
-        bvb = Team(name="Borussia Dortmund", short_name="BVB", country="Germany")
+        bvb = Team(ws_team_id=999002, name="Borussia Dortmund")
         db.add(bvb)
         db.flush()
         logger.info("Inserted Team: Borussia Dortmund")
     else:
         logger.info("Skipped Team: Borussia Dortmund (already exists)")
 
-    # Match
+    # Match (ws_match_id ist ein Platzhalter)
     match = (
         db.query(Match)
         .filter_by(
-            competition_id=competition.id,
+            stage_id=stage.id,
             home_team_id=fcb.id,
             away_team_id=bvb.id,
         )
@@ -59,13 +100,12 @@ def seed(db: Session) -> None:
     )
     if match is None:
         match = Match(
-            competition_id=competition.id,
+            ws_match_id=999001,
+            stage_id=stage.id,
             home_team_id=fcb.id,
             away_team_id=bvb.id,
-            kickoff_time=datetime(2025, 9, 20, 15, 30, tzinfo=_BERLIN),
+            kickoff_time=datetime(2026, 9, 19, 15, 30, tzinfo=_BERLIN),
             status="scheduled",
-            home_score=None,
-            away_score=None,
             last_updated=datetime.now(_BERLIN),
         )
         db.add(match)

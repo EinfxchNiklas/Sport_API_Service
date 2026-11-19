@@ -1,18 +1,18 @@
 from typing import Optional
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.models.country import Country
 
 
 class Team(Base):
     __tablename__ = "teams"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(nullable=False)
-    short_name: Mapped[Optional[str]]
-    country: Mapped[Optional[str]]
-    logo_url: Mapped[Optional[str]]
-    # ID aus der externen Datenquelle (API-Football team id, wird in den Website-URLs
-    # als ?team=<external_id> verwendet)
-    external_id: Mapped[Optional[int]] = mapped_column(index=True)
+    ws_team_id: Mapped[int] = mapped_column(unique=True)
+    name: Mapped[str]
+    country_id: Mapped[Optional[int]] = mapped_column(ForeignKey("countries.id"))
+
+    country: Mapped[Optional[Country]] = relationship()

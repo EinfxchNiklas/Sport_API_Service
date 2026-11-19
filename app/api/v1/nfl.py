@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.logging_config import get_logger
-from app.models import Competition, Match, NflGame, NflStanding, NflTeam
-from app.schemas import MatchRead, NflGameRead, NflStandingWithTeam, NflTeamRead
+from app.models import NflGame, NflStanding, NflTeam
+from app.schemas import NflGameRead, NflStandingWithTeam, NflTeamRead
 from app.services.nfl_service import import_nfl_games_new, import_nfl_standings, import_nfl_teams
 
 router = APIRouter(prefix="/nfl")
@@ -39,20 +39,11 @@ def get_nfl_games(
     season_type: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    """Liefert NFL-Spiele.
+    """Liefert NFL-Spiele (nfl_games) mit optionalem week/season_type-Filter.
 
-    Ohne ``season``-Parameter: Legacy-Verhalten (ältere matches-Tabelle).
-    Mit ``season``: neue nfl_games-Tabelle mit optionalem week/season_type-Filter.
+    Ohne ``season``-Parameter wird das aktuelle Jahr verwendet.
     """
-    if season is None:
-        # Legacy-Pfad: Spiele aus der matches-Tabelle
-        comp = db.query(Competition).filter(Competition.sport == "nfl").first()
-        if comp is None:
-            return []
-        matches = db.query(Match).filter(Match.competition_id == comp.id).all()
-        return [MatchRead.model_validate(m) for m in matches]
-
-    # Neuer Pfad: nfl_games-Tabelle
+    season = season or _dt.now().year
     q = db.query(NflGame).filter(NflGame.season == season)
     if week is not None:
         q = q.filter(NflGame.week == week)

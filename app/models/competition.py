@@ -1,22 +1,26 @@
 from typing import Optional
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.models.region import Region
 
 
 class Competition(Base):
+    """Wettbewerb (z. B. Bundesliga) laut WhoScored."""
+
     __tablename__ = "competitions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(nullable=False)
-    sport: Mapped[str] = mapped_column(nullable=False)
-    country: Mapped[Optional[str]]
-    season: Mapped[Optional[str]]
-    # URL-Slug der Website (z. B. "wm", "champions-league", "dfb-pokal", "bundesliga")
-    slug: Mapped[Optional[str]] = mapped_column(index=True)
-    # Format des Wettbewerbs: "league", "cup", "tournament"
+    ws_tournament_id: Mapped[int] = mapped_column(unique=True)
+    region_id: Mapped[int] = mapped_column(ForeignKey("regions.id"))
+    # soccerdata-Schlüssel der Liga (z. B. "GER-Bundesliga")
+    league_key: Mapped[str] = mapped_column(unique=True)
+    name: Mapped[str]
+    # URL-Slug (z. B. "bundesliga")
+    slug: Mapped[str] = mapped_column(unique=True)
+    # Format des Wettbewerbs: "league" | "cup" | "tournament"
     format: Mapped[Optional[str]]
-    logo_url: Mapped[Optional[str]]
-    # ID aus der externen Datenquelle (z. B. API-Football league id)
-    external_id: Mapped[Optional[int]] = mapped_column(index=True)
+
+    region: Mapped[Region] = relationship()

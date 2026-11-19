@@ -1,4 +1,3 @@
-from app.schemas.competition import CompetitionBase, CompetitionCreate, CompetitionRead
 from app.schemas.driver import DriverBase, DriverCreate, DriverRead
 from app.schemas.f1_standing import (
     ConstructorStandingBase,
@@ -8,12 +7,33 @@ from app.schemas.f1_standing import (
     DriverStandingCreate,
     DriverStandingRead,
 )
-from app.schemas.injury import InjuryBase, InjuryCreate, InjuryRead, InjuryWithPlayer
-from app.schemas.match import MatchBase, MatchCreate, MatchRead
+from app.schemas.football import (
+    CountryRead,
+    FootballCompetitionRead,
+    FootballLineups,
+    FootballMatchCompact,
+    FootballMatchDetail,
+    FootballMatchStats,
+    FootballSeasonRead,
+    FootballStandingRow,
+    FootballStandings,
+    FootballTeamRead,
+    FormationPositionRead,
+    FormationRead,
+    LineupEntry,
+    LineupTeam,
+    MatchIncidentRead,
+    MatchSyncStateRead,
+    MatchTeamDetail,
+    MissingPlayerRead,
+    NamedRef,
+    PlayerRef,
+    PlayerStatsRead,
+    TeamRef,
+)
 from app.schemas.nfl_game import NflGameBase, NflGameCreate, NflGameRead
 from app.schemas.nfl_standing import NflStandingBase, NflStandingCreate, NflStandingRead, NflStandingWithTeam
 from app.schemas.nfl_team import NflTeamBase, NflTeamCreate, NflTeamRead
-from app.schemas.player import PlayerBase, PlayerCreate, PlayerRead
 from app.schemas.race import RaceBase, RaceCreate, RaceRead
 from app.schemas.race_session import (
     RaceSessionBase,
@@ -25,13 +45,30 @@ from app.schemas.session_result import (
     SessionResultCreate,
     SessionResultRead,
 )
-from app.schemas.standing import StandingBase, StandingCreate, StandingRead
-from app.schemas.team import TeamBase, TeamCreate, TeamRead
 
 __all__ = [
-    "CompetitionBase",
-    "CompetitionCreate",
-    "CompetitionRead",
+    "CountryRead",
+    "FootballCompetitionRead",
+    "FootballLineups",
+    "FootballMatchCompact",
+    "FootballMatchDetail",
+    "FootballMatchStats",
+    "FootballSeasonRead",
+    "FootballStandingRow",
+    "FootballStandings",
+    "FootballTeamRead",
+    "FormationPositionRead",
+    "FormationRead",
+    "LineupEntry",
+    "LineupTeam",
+    "MatchIncidentRead",
+    "MatchSyncStateRead",
+    "MatchTeamDetail",
+    "MissingPlayerRead",
+    "NamedRef",
+    "PlayerRef",
+    "PlayerStatsRead",
+    "TeamRef",
     "DriverBase",
     "DriverCreate",
     "DriverRead",
@@ -41,13 +78,6 @@ __all__ = [
     "ConstructorStandingBase",
     "ConstructorStandingCreate",
     "ConstructorStandingRead",
-    "InjuryBase",
-    "InjuryCreate",
-    "InjuryRead",
-    "InjuryWithPlayer",
-    "MatchBase",
-    "MatchCreate",
-    "MatchRead",
     "NflGameBase",
     "NflGameCreate",
     "NflGameRead",
@@ -58,9 +88,6 @@ __all__ = [
     "NflTeamBase",
     "NflTeamCreate",
     "NflTeamRead",
-    "PlayerBase",
-    "PlayerCreate",
-    "PlayerRead",
     "RaceBase",
     "RaceCreate",
     "RaceRead",
@@ -70,10 +97,4 @@ __all__ = [
     "SessionResultBase",
     "SessionResultCreate",
     "SessionResultRead",
-    "StandingBase",
-    "StandingCreate",
-    "StandingRead",
-    "TeamBase",
-    "TeamCreate",
-    "TeamRead",
 ]

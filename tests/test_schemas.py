@@ -2,94 +2,14 @@ import types
 from datetime import datetime
 
 from app.schemas import (
-    CompetitionRead,
     DriverRead,
-    MatchRead,
     NflTeamRead,
     RaceRead,
-    TeamRead,
 )
 
 
 def make_obj(**kwargs):
     return types.SimpleNamespace(**kwargs)
-
-
-def test_competition_read():
-    obj = make_obj(id=1, name="Bundesliga", sport="football", country="Germany", season="2025/26")
-    schema = CompetitionRead.model_validate(obj)
-    assert schema.id == 1
-    assert schema.name == "Bundesliga"
-    assert schema.sport == "football"
-    assert schema.country == "Germany"
-    assert schema.season == "2025/26"
-
-
-def test_competition_read_optional_none():
-    obj = make_obj(id=2, name="La Liga", sport="football", country=None, season=None)
-    schema = CompetitionRead.model_validate(obj)
-    assert schema.country is None
-    assert schema.season is None
-
-
-def test_team_read():
-    obj = make_obj(id=1, name="Bayern Munich", short_name="FCB", country="Germany", logo_url="http://example.com/logo.png")
-    schema = TeamRead.model_validate(obj)
-    assert schema.id == 1
-    assert schema.name == "Bayern Munich"
-    assert schema.short_name == "FCB"
-    assert schema.country == "Germany"
-    assert schema.logo_url == "http://example.com/logo.png"
-
-
-def test_team_read_optional_none():
-    obj = make_obj(id=2, name="Some Team", short_name=None, country=None, logo_url=None)
-    schema = TeamRead.model_validate(obj)
-    assert schema.short_name is None
-    assert schema.logo_url is None
-
-
-def test_match_read():
-    now = datetime(2025, 8, 1, 18, 0, 0)
-    updated = datetime(2025, 8, 1, 20, 0, 0)
-    obj = make_obj(
-        id=10,
-        competition_id=1,
-        home_team_id=2,
-        away_team_id=3,
-        kickoff_time=now,
-        status="finished",
-        home_score=2,
-        away_score=1,
-        last_updated=updated,
-    )
-    schema = MatchRead.model_validate(obj)
-    assert schema.id == 10
-    assert schema.competition_id == 1
-    assert schema.home_team_id == 2
-    assert schema.away_team_id == 3
-    assert schema.kickoff_time == now
-    assert schema.status == "finished"
-    assert schema.home_score == 2
-    assert schema.away_score == 1
-    assert schema.last_updated == updated
-
-
-def test_match_read_optional_none():
-    obj = make_obj(
-        id=11,
-        competition_id=1,
-        home_team_id=2,
-        away_team_id=3,
-        kickoff_time=None,
-        status=None,
-        home_score=None,
-        away_score=None,
-        last_updated=None,
-    )
-    schema = MatchRead.model_validate(obj)
-    assert schema.kickoff_time is None
-    assert schema.last_updated is None
 
 
 def test_driver_read():
