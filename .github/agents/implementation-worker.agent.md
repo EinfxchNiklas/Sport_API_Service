@@ -1,7 +1,7 @@
 ---
 description: "Implementation worker for the Sport Dashboard API. Executes a single, well-scoped coding task delegated by the planner: create or edit specific files, follow project conventions, run and add tests, and return a concise report. Not intended for direct user selection."
 name: implementation-worker
-model: "Claude Sonnet 4.6 (copilot)"
+model: "Claude Sonnet 5.5 (copilot)"
 tools: [read, edit, search, execute, todo]
 user-invocable: false
 ---
