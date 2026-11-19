@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -6,7 +8,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.config import settings
 from app.database.session import get_db
-from app.models import Base, Competition, Driver, Match, NflTeam, Race, Team
+from app.models import Base, Driver, NflGame, NflTeam, Race
 from main import app
 
 SQLALCHEMY_TEST_URL = "sqlite:///:memory:"
@@ -20,49 +22,29 @@ TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=Fals
 
 
 def seed_db(db: Session):
-    # Bundesliga
-    bl_comp = Competition(name="Bundesliga", sport="football", season="2025")
-    db.add(bl_comp)
-    db.flush()
-
-    team1 = Team(name="Bayern Munich", country="Germany")
-    team2 = Team(name="Borussia Dortmund", country="Germany")
-    db.add_all([team1, team2])
-    db.flush()
-
-    bl_match = Match(
-        competition_id=bl_comp.id,
-        home_team_id=team1.id,
-        away_team_id=team2.id,
-        status="FT",
-        home_score=2,
-        away_score=1,
-    )
-    db.add(bl_match)
-
     # F1
     race = Race(name="Bahrain Grand Prix", season="2025", status="finished")
     driver = Driver(name="Max Verstappen", team="Red Bull", number=1)
     db.add_all([race, driver])
 
     # NFL
-    nfl_team = NflTeam(name="Kansas City Chiefs", conference="AFC", division="West")
-    db.add(nfl_team)
+    chiefs = NflTeam(name="Kansas City Chiefs", conference="AFC", division="West")
+    bills = NflTeam(name="Buffalo Bills", conference="AFC", division="East")
+    db.add_all([chiefs, bills])
     db.flush()
 
-    nfl_comp = Competition(name="NFL", sport="nfl", season="2025")
-    db.add(nfl_comp)
-    db.flush()
-
-    nfl_match = Match(
-        competition_id=nfl_comp.id,
-        home_team_id=team1.id,
-        away_team_id=team2.id,
-        status="Final",
-        home_score=27,
-        away_score=24,
+    db.add(
+        NflGame(
+            season=datetime.now().year,
+            season_type="reg",
+            week=1,
+            home_team_id=chiefs.id,
+            away_team_id=bills.id,
+            status="Final",
+            home_score=27,
+            away_score=24,
+        )
     )
-    db.add(nfl_match)
 
     db.commit()
 
@@ -89,23 +71,6 @@ def client():
 
     app.dependency_overrides.clear()
     Base.metadata.drop_all(bind=engine)
-
-
-# ── Bundesliga ──────────────────────────────────────────────────────────────
-
-def test_bundesliga_matches(client):
-    resp = client.get("/api/v1/bundesliga/matches")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) >= 1
-    assert data[0]["home_score"] == 2
-
-
-def test_bundesliga_table(client):
-    resp = client.get("/api/v1/bundesliga/table")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) >= 1
 
 
 # ── F1 ───────────────────────────────────────────────────────────────────────
@@ -141,6 +106,15 @@ def test_nfl_games(client):
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) >= 1
+    assert data[0]["home_score"] == 27
+
+
+def test_nfl_games_with_season(client):
+    resp = client.get(f"/api/v1/nfl/games?season={datetime.now().year}&week=1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["week"] == 1
 
 
 # ── Admin auth ────────────────────────────────────────────────────────────────
