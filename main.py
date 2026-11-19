@@ -25,8 +25,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Sport Dashboard API",
-    version="0.2.0",
-    description="Zentrale REST-API für Sportdaten (Bundesliga, F1, NFL).",
+    version="0.3.0",
+    description="Zentrale REST-API für Sportdaten (Fußball (WhoScored), F1, NFL).",
     lifespan=lifespan,
 )
 

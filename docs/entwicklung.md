@@ -7,6 +7,7 @@ Diese Anleitung beschreibt, wie du die Sport Dashboard API lokal zum Laufen brin
 ## Voraussetzungen
 
 - Python 3.14 (oder kompatibel)
+- **Google Chrome** (aktuelle Stable-Version) – nur nötig, wenn du den Fußball-Import (WhoScored) lokal ausführen willst. `seleniumbase` lädt beim ersten Lauf automatisch den passenden `chromedriver` (und legt einen Ordner `downloaded_files/` an, der in `.gitignore` steht). Liegt Chrome an einem ungewöhnlichen Ort, setze `WHOSCORED_BROWSER_PATH`.
 - Ein separates Neon-DEV-Projekt und eine Internetverbindung; alternativ Docker Desktop für eine lokale Datenbank → siehe [docker-anleitung.md](docker-anleitung.md)
 - Git
 
@@ -58,13 +59,19 @@ Eine bestehende `.env` mit eigenen Werten nicht überschreiben. Öffne sie in ei
 | `LOG_LEVEL`            | Log-Level: `DEBUG`, `INFO`, `WARNING`, `ERROR`                 |
 | `ENABLE_SCHEDULER`     | Scheduler aktivieren: `true` oder `false`                      |
 | `OPENF1_BASE_URL`      | Basis-URL der OpenF1-API (Standard: `https://api.openf1.org/v1`) |
-| `API_FOOTBALL_KEY`     | API-Schlüssel für api-football.com                             |
-| `API_FOOTBALL_BASE_URL`| Basis-URL der API-Football-API                                 |
 | `TANK01_KEY`           | RapidAPI-Schlüssel für Tank01 (NFL)                            |
 | `TANK01_HOST`          | RapidAPI-Host für Tank01                                       |
+| `WHOSCORED_ENABLED`    | Fußball-Import (WhoScored) und -Jobs an/aus (Standard: `true`)  |
+| `WHOSCORED_LEAGUES`    | Aktive Wettbewerbe, kommagetrennt (Standard: `GER-Bundesliga`) |
+| `WHOSCORED_HEADLESS`   | Chrome ohne Fenster starten (Standard: `true`; `false` zum Debuggen) |
+| `WHOSCORED_BROWSER_PATH` | Optional: Pfad zur Chrome-Binärdatei                         |
+| `WHOSCORED_DATA_DIR`   | Optional: Cache-Verzeichnis von `soccerdata` (setzt `SOCCERDATA_DIR`) |
+| `WHOSCORED_LOCK_TIMEOUT_SECONDS` | Maximale Wartezeit auf die Scraper-Sperre (Standard: `1800`) |
 | `TIMEZONE`             | Zeitzone, z. B. `Europe/Berlin`                                |
 
-> **Hinweis zu API-Keys:** Details zu den Datenquellen und wo du die Keys bekommst, findest du in [datenquellen.md](datenquellen.md).
+> **Hinweis zu Datenquellen:** Details zu den Datenquellen und wo du die Keys bekommst, findest du in [datenquellen.md](datenquellen.md). WhoScored benötigt keinen Key, aber einen installierten Chrome.
+
+> **Scheduler & Fußball:** Mit `ENABLE_SCHEDULER=true` und `WHOSCORED_ENABLED=true` startet beim Serverstart auch der Fußball-Bootstrap, der echte Scraping-Läufe gegen WhoScored startet. Für die lokale Entwicklung bleibt `ENABLE_SCHEDULER=false` meist die bessere Wahl. Zeitplan und Jobs: [scheduler.md](scheduler.md).
 
 ---
 
@@ -118,7 +125,26 @@ Die API ist nun unter [http://localhost:8000](http://localhost:8000) erreichbar.
 pytest -q
 ```
 
-Alle Tests befinden sich im Verzeichnis `tests/`.
+Alle Tests befinden sich im Verzeichnis `tests/`. Die Tests benötigen weder Chrome noch Netzwerkzugriff auf WhoScored; der Scraper wird in den Tests ersetzt.
+
+---
+
+## Fußballdaten lokal importieren (CLI)
+
+Mit installiertem Chrome und gesetzter `DATABASE_URL` (DEV-Datenbank!) kannst du Fußballdaten per Kommandozeile laden:
+
+```powershell
+# Registry der Wettbewerbe anzeigen (mit --live zusätzlich alle Wettbewerbe von WhoScored)
+python -m app.football_cli competitions [--live]
+
+# Saison importieren (Spielplan + Details beendeter Spiele)
+python -m app.football_cli import-season --league GER-Bundesliga --season 2627 [--no-details] [--max-matches N]
+
+# Ein einzelnes Spiel synchronisieren
+python -m app.football_cli sync-match --ws-match-id 1234567 [--final]
+```
+
+Zum Ausprobieren bietet sich `--no-details` oder `--max-matches 3` an, denn der Scraper wartet ca. 7–10 Sekunden pro Seite. Mehr dazu in [datenquellen.md](datenquellen.md).
 
 ---
 

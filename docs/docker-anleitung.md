@@ -4,6 +4,8 @@ Diese Anleitung richtet sich an Nutzer, die noch keine Erfahrung mit Docker habe
 
 **Docker ist optional:** Für die Entwicklung kann stattdessen eine separate Neon-DEV-Datenbank verwendet werden. Dann sind Docker Desktop und die Befehle in dieser Anleitung nicht erforderlich. Siehe [entwicklung.md](entwicklung.md).
 
+> **Hinweis:** Diese Anleitung betrifft nur die lokale Datenbank (`docker-compose.yml`). Das `Dockerfile` im Projekt-Root baut dagegen die App selbst (inkl. Chrome für den WhoScored-Scraper) und wird für das Deployment auf Render verwendet, siehe [deployment.md](deployment.md).
+
 ---
 
 ## Was ist Docker und wofür können wir es nutzen?
