@@ -35,7 +35,7 @@ python -m venv .venv
 ## Schritt 2: Abhängigkeiten installieren
 
 ```powershell
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ---
@@ -50,24 +50,24 @@ copy .env.example .env
 
 Eine bestehende `.env` mit eigenen Werten nicht überschreiben. Öffne sie in einem Texteditor und trage deine Werte ein. Eine Übersicht der Variablen:
 
-| Variable               | Beschreibung                                                   |
-|------------------------|----------------------------------------------------------------|
-| `APP_ENV`              | Umgebung: `development` oder `production`                      |
-| `DATABASE_URL`         | PostgreSQL-Verbindungs-URL (z. B. `postgresql+psycopg://sport:sport@localhost:5432/sportdb`) |
-| `ADMIN_API_KEY`        | Geheimer Schlüssel für Admin-Endpunkte (beliebiger sicherer Wert) |
-| `SESSION_SECRET`       | Signier-Schlüssel für das Admin-UI-Session-Cookie (`/admin`), beliebiger sicherer Wert |
-| `LOG_LEVEL`            | Log-Level: `DEBUG`, `INFO`, `WARNING`, `ERROR`                 |
-| `ENABLE_SCHEDULER`     | Scheduler aktivieren: `true` oder `false`                      |
-| `OPENF1_BASE_URL`      | Basis-URL der OpenF1-API (Standard: `https://api.openf1.org/v1`) |
-| `TANK01_KEY`           | RapidAPI-Schlüssel für Tank01 (NFL)                            |
-| `TANK01_HOST`          | RapidAPI-Host für Tank01                                       |
-| `WHOSCORED_ENABLED`    | Fußball-Import (WhoScored) und -Jobs an/aus (Standard: `true`)  |
-| `WHOSCORED_LEAGUES`    | Aktive Wettbewerbe, kommagetrennt (Standard: `GER-Bundesliga`) |
-| `WHOSCORED_HEADLESS`   | Chrome ohne Fenster starten (Standard: `true`; `false` zum Debuggen) |
-| `WHOSCORED_BROWSER_PATH` | Optional: Pfad zur Chrome-Binärdatei                         |
-| `WHOSCORED_DATA_DIR`   | Optional: Cache-Verzeichnis von `soccerdata` (setzt `SOCCERDATA_DIR`) |
-| `WHOSCORED_LOCK_TIMEOUT_SECONDS` | Maximale Wartezeit auf die Scraper-Sperre (Standard: `1800`) |
-| `TIMEZONE`             | Zeitzone, z. B. `Europe/Berlin`                                |
+| Variable                           | Beschreibung                                                                                   |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `APP_ENV`                        | Umgebung: `development` oder `production`                                                  |
+| `DATABASE_URL`                   | PostgreSQL-Verbindungs-URL (z. B. `postgresql+psycopg://sport:sport@localhost:5432/sportdb`) |
+| `ADMIN_API_KEY`                  | Geheimer Schlüssel für Admin-Endpunkte (beliebiger sicherer Wert)                            |
+| `SESSION_SECRET`                 | Signier-Schlüssel für das Admin-UI-Session-Cookie (`/admin`), beliebiger sicherer Wert     |
+| `LOG_LEVEL`                      | Log-Level: `DEBUG`, `INFO`, `WARNING`, `ERROR`                                         |
+| `ENABLE_SCHEDULER`               | Scheduler aktivieren: `true` oder `false`                                                  |
+| `OPENF1_BASE_URL`                | Basis-URL der OpenF1-API (Standard: `https://api.openf1.org/v1`)                             |
+| `TANK01_KEY`                     | RapidAPI-Schlüssel für Tank01 (NFL)                                                          |
+| `TANK01_HOST`                    | RapidAPI-Host für Tank01                                                                      |
+| `WHOSCORED_ENABLED`              | Fußball-Import (WhoScored) und -Jobs an/aus (Standard: `true`)                              |
+| `WHOSCORED_LEAGUES`              | Aktive Wettbewerbe, kommagetrennt (Standard: `GER-Bundesliga`)                               |
+| `WHOSCORED_HEADLESS`             | Chrome ohne Fenster starten (Standard: `true`; `false` zum Debuggen)                       |
+| `WHOSCORED_BROWSER_PATH`         | Optional: Pfad zur Chrome-Binärdatei                                                          |
+| `WHOSCORED_DATA_DIR`             | Optional: Cache-Verzeichnis von `soccerdata` (setzt `SOCCERDATA_DIR`)                      |
+| `WHOSCORED_LOCK_TIMEOUT_SECONDS` | Maximale Wartezeit auf die Scraper-Sperre (Standard: `1800`)                                 |
+| `TIMEZONE`                       | Zeitzone, z. B. `Europe/Berlin`                                                              |
 
 > **Hinweis zu Datenquellen:** Details zu den Datenquellen und wo du die Keys bekommst, findest du in [datenquellen.md](datenquellen.md). WhoScored benötigt keinen Key, aber einen installierten Chrome.
 
